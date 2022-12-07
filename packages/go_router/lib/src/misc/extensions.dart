@@ -36,30 +36,31 @@ extension GoRouterHelper on BuildContext {
         extra: extra,
       );
 
-  /// Push a location onto the page stack.
-  void push(String location, {Object? extra}) =>
-      GoRouter.of(this).push(location, extra: extra);
+  /// Push a location onto the page stack with an optional promise.
+  Future<T?> push<T extends Object?>(String location, {Object? extra}) =>
+      GoRouter.of(this).push<T?>(location, extra: extra);
 
-  /// Navigate to a named route onto the page stack.
-  void pushNamed(
-    String name, {
-    Map<String, String> params = const <String, String>{},
-    Map<String, dynamic> queryParams = const <String, dynamic>{},
-    Object? extra,
-  }) =>
-      GoRouter.of(this).pushNamed(
+  /// Navigate to a named route onto the page stack with an optional promise.
+  Future<T?> pushNamed<T extends Object?>(
+      String name, {
+        Map<String, String> params = const <String, String>{},
+        Map<String, dynamic> queryParams = const <String, dynamic>{},
+        Object? extra,
+      }) =>
+      GoRouter.of(this).pushNamed<T>(
         name,
         params: params,
         queryParams: queryParams,
         extra: extra,
       );
 
+
   /// Returns `true` if there is more than 1 page on the stack.
   bool canPop() => GoRouter.of(this).canPop();
 
   /// Pop the top page off the Navigator's page stack by calling
   /// [Navigator.pop].
-  void pop() => GoRouter.of(this).pop();
+  void pop<T extends Object?>([T? value]) => GoRouter.of(this).pop<T>(value);
 
   /// Replaces the top-most page of the page stack with the given URL location
   /// w/ optional query parameters, e.g. `/family/f2/person/p1?color=blue`.
@@ -67,8 +68,8 @@ extension GoRouterHelper on BuildContext {
   /// See also:
   /// * [go] which navigates to the location.
   /// * [push] which pushes the location onto the page stack.
-  void replace(String location, {Object? extra}) =>
-      GoRouter.of(this).replace(location, extra: extra);
+  Future<T?> replace<T extends Object?>(String location, {Object? extra}) =>
+      GoRouter.of(this).replace<T>(location, extra: extra);
 
   /// Replaces the top-most page of the page stack with the named route w/
   /// optional parameters, e.g. `name='person', params={'fid': 'f2', 'pid':
@@ -77,13 +78,13 @@ extension GoRouterHelper on BuildContext {
   /// See also:
   /// * [goNamed] which navigates a named route.
   /// * [pushNamed] which pushes a named route onto the page stack.
-  void replaceNamed(
-    String name, {
-    Map<String, String> params = const <String, String>{},
-    Map<String, dynamic> queryParams = const <String, dynamic>{},
-    Object? extra,
-  }) =>
-      GoRouter.of(this).replaceNamed(
+  Future<T?> replaceNamed<T extends Object?>(
+      String name, {
+        Map<String, String> params = const <String, String>{},
+        Map<String, dynamic> queryParams = const <String, dynamic>{},
+        Object? extra,
+      }) =>
+      GoRouter.of(this).replaceNamed<T?>(
         name,
         params: params,
         queryParams: queryParams,

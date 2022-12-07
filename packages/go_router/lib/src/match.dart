@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'matching.dart';
 import 'path_utils.dart';
 import 'route.dart';
+import 'dart:async';
 
 ///  An instance of a GoRoute plus information about the current location.
 class RouteMatch {
@@ -16,6 +17,7 @@ class RouteMatch {
     required this.route,
     required this.subloc,
     required this.extra,
+    required this.completer,
     required this.error,
     required this.pageKey,
   });
@@ -26,6 +28,7 @@ class RouteMatch {
     required String restLoc, // e.g. person/p1
     required String parentSubloc, // e.g. /family/f2
     required Map<String, String> pathParameters,
+    Completer<dynamic>? completer,
     required Object? extra,
   }) {
     if (route is ShellRoute) {
@@ -33,6 +36,7 @@ class RouteMatch {
         route: route,
         subloc: restLoc,
         extra: extra,
+        completer: completer,
         error: null,
         pageKey: ValueKey<String>(route.hashCode.toString()),
       );
@@ -54,6 +58,7 @@ class RouteMatch {
         route: route,
         subloc: subloc,
         extra: extra,
+        completer: completer,
         error: null,
         pageKey: ValueKey<String>(route.hashCode.toString()),
       );
@@ -69,6 +74,9 @@ class RouteMatch {
 
   /// An extra object to pass along with the navigation.
   final Object? extra;
+
+  /// The completer for the promise when pushing routes.
+  final Completer<dynamic>? completer;
 
   /// An exception if there was an error during matching.
   final Exception? error;

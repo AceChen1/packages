@@ -142,7 +142,7 @@ class GoRouter extends ChangeNotifier implements RouterConfig<RouteMatchList> {
   String get location => _location;
   String _location = '/';
 
-  /// Returns `true` if there is more than 1 page on the stack.
+  /// Returns `true` if there is at least two or more route can be pop.
   bool canPop() => _routerDelegate.canPop();
 
   void _handleStateMayChange() {
@@ -204,35 +204,35 @@ class GoRouter extends ChangeNotifier implements RouterConfig<RouteMatchList> {
 
   /// Push a URI location onto the page stack w/ optional query parameters, e.g.
   /// `/family/f2/person/p1?color=blue`
-  void push(String location, {Object? extra}) {
+  Future<T?> push<T extends Object?>(String location, {Object? extra}) async {
     assert(() {
       log.info('pushing $location');
       return true;
     }());
-    _routeInformationParser
-        .parseRouteInformationWithDependencies(
+    final RouteMatchList matches =
+    await _routeInformationParser.parseRouteInformationWithDependencies(
       RouteInformation(location: location, state: extra),
       // TODO(chunhtai): avoid accessing the context directly through global key.
       // https://github.com/flutter/flutter/issues/99112
       _routerDelegate.navigatorKey.currentContext!,
-    )
-        .then<void>((RouteMatchList matches) {
-      _routerDelegate.push(matches);
-    });
+    );
+
+    return _routerDelegate.push<T?>(matches);
   }
 
   /// Push a named route onto the page stack w/ optional parameters, e.g.
   /// `name='person', params={'fid': 'f2', 'pid': 'p1'}`
-  void pushNamed(
-    String name, {
-    Map<String, String> params = const <String, String>{},
-    Map<String, dynamic> queryParams = const <String, dynamic>{},
-    Object? extra,
-  }) =>
-      push(
+  Future<T?> pushNamed<T extends Object?>(
+      String name, {
+        Map<String, String> params = const <String, String>{},
+        Map<String, dynamic> queryParams = const <String, dynamic>{},
+        Object? extra,
+      }) =>
+      push<T?>(
         namedLocation(name, params: params, queryParams: queryParams),
         extra: extra,
       );
+
 
   /// Replaces the top-most page of the page stack with the given URL location
   /// w/ optional query parameters, e.g. `/family/f2/person/p1?color=blue`.
@@ -240,18 +240,19 @@ class GoRouter extends ChangeNotifier implements RouterConfig<RouteMatchList> {
   /// See also:
   /// * [go] which navigates to the location.
   /// * [push] which pushes the location onto the page stack.
-  void replace(String location, {Object? extra}) {
-    routeInformationParser
-        .parseRouteInformationWithDependencies(
+  Future<T?> replace<T extends Object?>(String location,
+      {Object? extra}) async {
+    final RouteMatchList matches =
+    await routeInformationParser.parseRouteInformationWithDependencies(
       RouteInformation(location: location, state: extra),
       // TODO(chunhtai): avoid accessing the context directly through global key.
       // https://github.com/flutter/flutter/issues/99112
       _routerDelegate.navigatorKey.currentContext!,
-    )
-        .then<void>((RouteMatchList matchList) {
-      routerDelegate.replace(matchList);
-    });
+    );
+
+    return routerDelegate.replace<T?>(matches);
   }
+
 
   /// Replaces the top-most page of the page stack with the named route w/
   /// optional parameters, e.g. `name='person', params={'fid': 'f2', 'pid':
@@ -260,25 +261,27 @@ class GoRouter extends ChangeNotifier implements RouterConfig<RouteMatchList> {
   /// See also:
   /// * [goNamed] which navigates a named route.
   /// * [pushNamed] which pushes a named route onto the page stack.
-  void replaceNamed(
-    String name, {
-    Map<String, String> params = const <String, String>{},
-    Map<String, dynamic> queryParams = const <String, dynamic>{},
-    Object? extra,
-  }) {
-    replace(
-      namedLocation(name, params: params, queryParams: queryParams),
-      extra: extra,
-    );
-  }
+  Future<T?> replaceNamed<T extends Object?>(
+      String name, {
+        Map<String, String> params = const <String, String>{},
+        Map<String, dynamic> queryParams = const <String, dynamic>{},
+        Object? extra,
+      }) =>
+      replace<T?>(
+        namedLocation(name, params: params, queryParams: queryParams),
+        extra: extra,
+      );
 
-  /// Pop the top page off the GoRouter's page stack.
-  void pop() {
+  /// Pop the top-most route off the current screen.
+  ///
+  /// If the top-most route is a pop up or dialog, this method pops it instead
+  /// of any GoRoute under it.
+  void pop<T extends Object?>([T? result]) {
     assert(() {
       log.info('popping $location');
       return true;
     }());
-    _routerDelegate.pop();
+    _routerDelegate.pop<T>(result);
   }
 
   /// Refresh the route.

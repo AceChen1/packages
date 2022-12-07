@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-
+import 'delegate.dart';
 import 'configuration.dart';
 import 'information_provider.dart';
 import 'logging.dart';
@@ -98,6 +98,10 @@ class GoRouteInformationParser extends RouteInformationParser<RouteMatchList> {
   /// for use by the Router architecture as part of the RouteInformationParser
   @override
   RouteInformation restoreRouteInformation(RouteMatchList configuration) {
+    if (configuration.matches.last is ImperativeRouteMatch) {
+      configuration =
+          (configuration.matches.last as ImperativeRouteMatch).matches;
+    }
     return RouteInformation(
       location: configuration.uri.toString(),
       state: configuration.extra,
