@@ -119,15 +119,6 @@ class GoRouterDelegate extends RouterDelegate<RouteMatchList>
     final _NavigatorStateIterator iterator = _createNavigatorStateIterator();
     while (iterator.moveNext()) {
       if (iterator.current.canPop()) {
-        if(iterator.isGoRouter == true){
-          try {
-            final RouteMatch last = _matchList.last;
-            // If there is a promise for this page, complete it.
-            if (last.completer != null) {
-              last.completer?.complete(result);
-            }
-          } catch (_) {}
-        }
         iterator.current.pop<T>(result);
         return;
       }
@@ -147,6 +138,13 @@ class GoRouterDelegate extends RouterDelegate<RouteMatchList>
     if (!route.didPop(result)) {
       return false;
     }
+    try {
+      final RouteMatch last = _matchList.last;
+      // If there is a promise for this page, complete it.
+      if (last.completer != null) {
+        last.completer?.complete(result);
+      }
+    } catch (_) {}
     _matchList.pop();
     notifyListeners();
     assert(() {
@@ -218,7 +216,6 @@ class _NavigatorStateIterator extends Iterator<NavigatorState> {
   final NavigatorState root;
   @override
   late NavigatorState current;
-  bool isGoRouter = false;
 
   @override
   bool moveNext() {
@@ -239,7 +236,6 @@ class _NavigatorStateIterator extends Iterator<NavigatorState> {
           index = -1;
           assert(root == parentNavigatorKey.currentState);
           current = root;
-          isGoRouter = true;
           return true;
         }
         // It must be a ShellRoute that holds this parentNavigatorKey;
@@ -262,7 +258,6 @@ class _NavigatorStateIterator extends Iterator<NavigatorState> {
         }
 
         current = parentNavigatorKey.currentState!;
-        isGoRouter = true;
         return true;
       } else if (route is ShellRoute) {
         // Must have a ModalRoute parent because the navigator ShellRoute
@@ -275,13 +270,11 @@ class _NavigatorStateIterator extends Iterator<NavigatorState> {
           continue;
         }
         current = route.navigatorKey.currentState!;
-        isGoRouter = true;
         return true;
       }
     }
     assert(index == -1);
     current = root;
-    isGoRouter = false;
     return true;
   }
 }
