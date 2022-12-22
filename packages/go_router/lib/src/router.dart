@@ -295,8 +295,10 @@ class GoRouter extends ChangeNotifier implements RouterConfig<RouteMatchList> {
 
   /// Find the current GoRouter in the widget tree.
   static GoRouter of(BuildContext context) {
+    // final InheritedGoRouter? inherited =
+    //     context.dependOnInheritedWidgetOfExactType<InheritedGoRouter>();
     final InheritedGoRouter? inherited =
-        context.dependOnInheritedWidgetOfExactType<InheritedGoRouter>();
+    context.findAncestorWidgetOfExactType<InheritedGoRouter>();
     assert(inherited != null, 'No GoRouter found in context');
     return inherited!.goRouter;
   }

@@ -192,6 +192,8 @@ class GoRouterDelegate extends RouterDelegate<RouteMatchList>
   /// For use by the Router architecture as part of the RouterDelegate.
   @override
   Future<void> setNewRoutePath(RouteMatchList configuration) {
+    /// open deep link mode
+    builder.resetAppKeyToPage();
     _matchList = configuration;
     assert(_matchList.isNotEmpty);
     notifyListeners();

@@ -28,6 +28,19 @@ class RouteBuilder {
     required this.observers,
   });
 
+  /// Update
+  Map<GlobalKey<NavigatorState>, List<Page<Object?>>> _appKeyToPage =
+  <GlobalKey<NavigatorState>, List<Page<Object?>>>{};
+
+  bool _deepLinkFlag = true;
+
+  void resetAppKeyToPage() {
+    _deepLinkFlag = true;
+    _appKeyToPage = <GlobalKey<NavigatorState>, List<Page<Object?>>>{};
+  }
+
+  /// 0-0-0-0-0-0-0-0-0-0-0
+
   /// Builder function for a go router with Navigator.
   final GoRouterBuilderWithNav builderWithNav;
 
@@ -52,11 +65,11 @@ class RouteBuilder {
 
   /// Builds the top-level Navigator for the given [RouteMatchList].
   Widget build(
-    BuildContext context,
-    RouteMatchList matchList,
-    PopPageCallback onPopPage,
-    bool routerNeglect,
-  ) {
+      BuildContext context,
+      RouteMatchList matchList,
+      PopPageCallback onPopPage,
+      bool routerNeglect,
+      ) {
     if (matchList.isEmpty) {
       // The build method can be called before async redirect finishes. Build a
       // empty box until then.
@@ -68,7 +81,7 @@ class RouteBuilder {
         builder: (BuildContext context) {
           try {
             final Map<Page<Object?>, GoRouterState> newRegistry =
-                <Page<Object?>, GoRouterState>{};
+            <Page<Object?>, GoRouterState>{};
             final Widget result = tryBuild(context, matchList, onPopPage,
                 routerNeglect, configuration.navigatorKey, newRegistry);
             _registry.updateRegistry(newRegistry);
@@ -89,13 +102,13 @@ class RouteBuilder {
   /// Throws a [_RouteBuilderError].
   @visibleForTesting
   Widget tryBuild(
-    BuildContext context,
-    RouteMatchList matchList,
-    PopPageCallback onPopPage,
-    bool routerNeglect,
-    GlobalKey<NavigatorState> navigatorKey,
-    Map<Page<Object?>, GoRouterState> registry,
-  ) {
+      BuildContext context,
+      RouteMatchList matchList,
+      PopPageCallback onPopPage,
+      bool routerNeglect,
+      GlobalKey<NavigatorState> navigatorKey,
+      Map<Page<Object?>, GoRouterState> registry,
+      ) {
     return builderWithNav(
       context,
       _buildNavigator(
@@ -104,6 +117,7 @@ class RouteBuilder {
             registry),
         navigatorKey,
         observers: observers,
+        cancelDeepLink: true,
       ),
     );
   }
@@ -120,7 +134,7 @@ class RouteBuilder {
       Map<Page<Object?>, GoRouterState> registry) {
     try {
       final Map<GlobalKey<NavigatorState>, List<Page<Object?>>> keyToPage =
-          <GlobalKey<NavigatorState>, List<Page<Object?>>>{};
+      <GlobalKey<NavigatorState>, List<Page<Object?>>>{};
       _buildRecursive(context, matchList, 0, onPopPage, routerNeglect,
           keyToPage, navigatorKey, registry);
       return keyToPage[navigatorKey]!;
@@ -132,15 +146,15 @@ class RouteBuilder {
   }
 
   void _buildRecursive(
-    BuildContext context,
-    RouteMatchList matchList,
-    int startIndex,
-    PopPageCallback onPopPage,
-    bool routerNeglect,
-    Map<GlobalKey<NavigatorState>, List<Page<Object?>>> keyToPages,
-    GlobalKey<NavigatorState> navigatorKey,
-    Map<Page<Object?>, GoRouterState> registry,
-  ) {
+      BuildContext context,
+      RouteMatchList matchList,
+      int startIndex,
+      PopPageCallback onPopPage,
+      bool routerNeglect,
+      Map<GlobalKey<NavigatorState>, List<Page<Object?>>> keyToPages,
+      GlobalKey<NavigatorState> navigatorKey,
+      Map<Page<Object?>, GoRouterState> registry,
+      ) {
     if (startIndex >= matchList.matches.length) {
       return;
     }
@@ -183,6 +197,9 @@ class RouteBuilder {
       // that the page for this ShellRoute is placed at the right index.
       final int shellPageIdx = keyToPages[parentNavigatorKey]!.length;
 
+      /// update: record history length of shellNavigator pages
+      final int shellNavigatorPagesHistoryLength = _appKeyToPage.containsKey(shellNavigatorKey) ? _appKeyToPage[shellNavigatorKey]!.length : 0;
+
       // Build the remaining pages
       _buildRecursive(context, matchList, startIndex + 1, onPopPage,
           routerNeglect, keyToPages, shellNavigatorKey, registry);
@@ -193,25 +210,68 @@ class RouteBuilder {
 
       // Build the Page for this route
       final Page<Object?> page =
-          _buildPageForRoute(context, state, match, child: child);
+      _buildPageForRoute(context, state, match, child: child);
       registry[page] = state;
       // Place the ShellRoute's Page onto the list for the parent navigator.
       keyToPages
           .putIfAbsent(parentNavigatorKey, () => <Page<Object?>>[])
           .insert(shellPageIdx, page);
+
+      /// update: handle shell page update
+      if(_appKeyToPage.containsKey(parentNavigatorKey) && _appKeyToPage.containsKey(shellNavigatorKey) && _appKeyToPage[shellNavigatorKey]!.length != shellNavigatorPagesHistoryLength){
+        _appKeyToPage[parentNavigatorKey]!.replaceRange(shellPageIdx, shellPageIdx+1, <Page<Object?>>[page]);
+      }
     }
   }
 
   Navigator _buildNavigator(
-    PopPageCallback onPopPage,
-    List<Page<Object?>> pages,
-    Key? navigatorKey, {
-    List<NavigatorObserver> observers = const <NavigatorObserver>[],
-  }) {
+      PopPageCallback onPopPage,
+      List<Page<Object?>> pages,
+      Key? navigatorKey, {
+        List<NavigatorObserver> observers = const <NavigatorObserver>[],
+        bool cancelDeepLink = false,
+      }) {
+    assert(navigatorKey != null);
+    if (!_deepLinkFlag && _appKeyToPage.containsKey(navigatorKey)) {
+      final List<Page<Object?>> historyPages = _appKeyToPage[navigatorKey]!;
+
+      /// Update: pop
+      if (historyPages.length > pages.length) {
+        while(historyPages.length > pages.length){
+          historyPages.removeLast();
+        }
+        for(int index = 0; index < historyPages.length; index++){
+          if(historyPages[index].key != pages[index].key){
+            historyPages[index] = pages[index];
+          }
+        }
+      }
+      /// Update: push
+      if (historyPages.length < pages.length) {
+        int index = 0;
+        for(; index < historyPages.length; index++){
+          if(historyPages[index].key != pages[index].key){
+            historyPages[index] = pages[index];
+          }
+        }
+        for(; index < pages.length; index++){
+          historyPages.add(pages[index]);
+        }
+      }
+
+    } else {
+      _appKeyToPage[navigatorKey! as GlobalKey<NavigatorState>] = pages;
+    }
+
+    /// only tryBuild() can use cancelDeepLink
+    if (cancelDeepLink) {
+      _deepLinkFlag = false;
+    }
+
     return Navigator(
       key: navigatorKey,
       restorationScopeId: restorationScopeId,
-      pages: pages,
+      pages: List<Page<Object?>>.of(_appKeyToPage[navigatorKey]!),
       observers: observers,
       onPopPage: onPopPage,
     );
@@ -229,7 +289,7 @@ class RouteBuilder {
       path = route.path;
     }
     final RouteMatchList effectiveMatchList =
-        match is ImperativeRouteMatch ? match.matches : matchList;
+    match is ImperativeRouteMatch ? match.matches : matchList;
     return GoRouterState(
       configuration,
       location: effectiveMatchList.uri.toString(),
@@ -318,9 +378,9 @@ class RouteBuilder {
   _PageBuilderForAppType? _pageBuilderForAppType;
 
   Widget Function(
-    BuildContext context,
-    GoRouterState state,
-  )? _errorBuilderForAppType;
+      BuildContext context,
+      GoRouterState state,
+      )? _errorBuilderForAppType;
 
   void _cacheAppType(BuildContext context) {
     // cache app type-specific page and error builders
@@ -355,10 +415,10 @@ class RouteBuilder {
   /// builds the page based on app type, i.e. MaterialApp vs. CupertinoApp
   @visibleForTesting
   Page<Object?> buildPage(
-    BuildContext context,
-    GoRouterState state,
-    Widget child,
-  ) {
+      BuildContext context,
+      GoRouterState state,
+      Widget child,
+      ) {
     // build the page based on app type
     _cacheAppType(context);
     return _pageBuilderForAppType!(
@@ -404,10 +464,10 @@ class RouteBuilder {
 
   /// Builds a an error page.
   Page<void> _buildErrorPage(
-    BuildContext context,
-    _RouteBuilderError error,
-    Uri uri,
-  ) {
+      BuildContext context,
+      _RouteBuilderError error,
+      Uri uri,
+      ) {
     final GoRouterState state = GoRouterState(
       configuration,
       location: uri.toString(),
@@ -428,21 +488,21 @@ class RouteBuilder {
     return errorPageBuilder != null
         ? errorPageBuilder!(context, state)
         : buildPage(
-            context,
-            state,
-            errorBuilder != null
-                ? errorBuilder(context, state)
-                : _errorBuilderForAppType!(context, state),
-          );
+      context,
+      state,
+      errorBuilder != null
+          ? errorBuilder(context, state)
+          : _errorBuilderForAppType!(context, state),
+    );
   }
 }
 
 typedef _PageBuilderForAppType = Page<void> Function({
-  required LocalKey key,
-  required String? name,
-  required Object? arguments,
-  required String restorationId,
-  required Widget child,
+required LocalKey key,
+required String? name,
+required Object? arguments,
+required String restorationId,
+required Widget child,
 });
 
 /// An error that occurred while building the app's UI based on the route
