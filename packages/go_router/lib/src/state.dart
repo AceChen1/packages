@@ -4,7 +4,6 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../go_router.dart';
 import 'configuration.dart';
 import 'misc/errors.dart';
 
@@ -15,21 +14,21 @@ import 'misc/errors.dart';
 class GoRouterState {
   /// Default constructor for creating route state during routing.
   const GoRouterState(
-    this._configuration, {
-    required this.location,
-    required this.subloc,
-    required this.name,
-    this.path,
-    this.fullpath,
-    this.params = const <String, String>{},
-    this.queryParams = const <String, String>{},
-    this.queryParametersAll = const <String, List<String>>{},
-    this.extra,
-    this.error,
-    required this.pageKey,
-  });
+      this._configuration, {
+        required this.location,
+        required this.subloc,
+        required this.name,
+        this.path,
+        this.fullpath,
+        this.params = const <String, String>{},
+        this.queryParams = const <String, String>{},
+        this.queryParametersAll = const <String, List<String>>{},
+        this.extra,
+        this.error,
+        required this.pageKey,
+      });
 
-  // TODO(johnpryan): remove once namedLocation is removed from go_router.
+  // TODO(johnpryan): remove once namedLocation is removed from go_router_flow.
   // See https://github.com/flutter/flutter/issues/107729
   final RouteConfiguration _configuration;
 
@@ -116,7 +115,7 @@ class GoRouterState {
           'There is no GoRouterStateRegistryScope above the current context.');
     }
     final GoRouterState state =
-        scope.notifier!._createPageRouteAssociation(settings, route);
+    scope.notifier!._createPageRouteAssociation(settings, route);
     return state;
   }
 
@@ -125,10 +124,10 @@ class GoRouterState {
   @Deprecated(
       'Uses GoRouter.of(context).routeInformationParser.namedLocation instead')
   String namedLocation(
-    String name, {
-    Map<String, String> params = const <String, String>{},
-    Map<String, String> queryParams = const <String, String>{},
-  }) {
+      String name, {
+        Map<String, String> params = const <String, String>{},
+        Map<String, String> queryParams = const <String, String>{},
+      }) {
     return _configuration.namedLocation(name,
         params: params, queryParams: queryParams);
   }
@@ -179,10 +178,10 @@ class GoRouterStateRegistry extends ChangeNotifier {
   /// A [Map] that maps a [Page] to a [GoRouterState].
   @visibleForTesting
   final Map<Page<Object?>, GoRouterState> registry =
-      <Page<Object?>, GoRouterState>{};
+  <Page<Object?>, GoRouterState>{};
 
   final Map<Route<Object?>, Page<Object?>> _routePageAssociation =
-      <ModalRoute<Object?>, Page<Object?>>{};
+  <ModalRoute<Object?>, Page<Object?>>{};
 
   GoRouterState _createPageRouteAssociation(
       Page<Object?> page, ModalRoute<Object?> route) {
@@ -199,7 +198,7 @@ class GoRouterStateRegistry extends ChangeNotifier {
         // Can't use `page` directly because Route.settings may have changed during
         // the lifetime of this route.
         final Page<Object?> associatedPage =
-            _routePageAssociation.remove(route)!;
+        _routePageAssociation.remove(route)!;
         assert(registry.containsKey(associatedPage));
         registry.remove(associatedPage);
       });
@@ -217,9 +216,9 @@ class GoRouterStateRegistry extends ChangeNotifier {
   void updateRegistry(Map<Page<Object?>, GoRouterState> newRegistry) {
     bool shouldNotify = false;
     final Set<Page<Object?>> pagesWithAssociation =
-        _routePageAssociation.values.toSet();
+    _routePageAssociation.values.toSet();
     for (final MapEntry<Page<Object?>, GoRouterState> entry
-        in newRegistry.entries) {
+    in newRegistry.entries) {
       final GoRouterState? existingState = registry[entry.key];
       if (existingState != null) {
         if (existingState != entry.value) {

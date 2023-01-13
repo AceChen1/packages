@@ -28,7 +28,7 @@ class RouteBuilder {
     required this.observers,
   });
 
-  /// Update
+  /// CHANGE
   Map<GlobalKey<NavigatorState>, List<Page<Object?>>> _appKeyToPage =
   <GlobalKey<NavigatorState>, List<Page<Object?>>>{};
 
@@ -39,7 +39,6 @@ class RouteBuilder {
     _appKeyToPage = <GlobalKey<NavigatorState>, List<Page<Object?>>>{};
   }
 
-  /// 0-0-0-0-0-0-0-0-0-0-0
 
   /// Builder function for a go router with Navigator.
   final GoRouterBuilderWithNav builderWithNav;
@@ -197,12 +196,13 @@ class RouteBuilder {
       // that the page for this ShellRoute is placed at the right index.
       final int shellPageIdx = keyToPages[parentNavigatorKey]!.length;
 
-      /// update: record history length of shellNavigator pages
-      final int shellNavigatorPagesHistoryLength = _appKeyToPage.containsKey(shellNavigatorKey) ? _appKeyToPage[shellNavigatorKey]!.length : 0;
-
       // Build the remaining pages
       _buildRecursive(context, matchList, startIndex + 1, onPopPage,
           routerNeglect, keyToPages, shellNavigatorKey, registry);
+
+      /// Change: record history and new shellNavigator pages
+      final List<Page<Object?>> oldShellNavigatorPages = _appKeyToPage.containsKey(shellNavigatorKey) ?  _appKeyToPage[shellNavigatorKey]! : <Page<Object?>>[];
+      final bool isNeedRebuildShellPage = _compareShellNavigatorPages(oldPages: oldShellNavigatorPages, newPages: keyToPages[shellNavigatorKey]!);
 
       // Build the Navigator
       final Widget child = _buildNavigator(
@@ -217,11 +217,25 @@ class RouteBuilder {
           .putIfAbsent(parentNavigatorKey, () => <Page<Object?>>[])
           .insert(shellPageIdx, page);
 
-      /// update: handle shell page update
-      if(_appKeyToPage.containsKey(parentNavigatorKey) && _appKeyToPage.containsKey(shellNavigatorKey) && _appKeyToPage[shellNavigatorKey]!.length != shellNavigatorPagesHistoryLength){
+      /// CHANGE: handle shell page update
+      if(_appKeyToPage.containsKey(parentNavigatorKey) && _appKeyToPage.containsKey(shellNavigatorKey) && isNeedRebuildShellPage){
         _appKeyToPage[parentNavigatorKey]!.replaceRange(shellPageIdx, shellPageIdx+1, <Page<Object?>>[page]);
       }
     }
+  }
+
+  bool _compareShellNavigatorPages({required List<Page<Object?>> oldPages, required List<Page<Object?>> newPages}){
+    if(oldPages.length != newPages.length){
+      return true;
+    }
+
+    for(int index = 0; index < oldPages.length; index++){
+      if(oldPages[index].key != newPages[index].key){
+        return true;
+      }
+    }
+
+    return false;
   }
 
   Navigator _buildNavigator(
@@ -235,8 +249,8 @@ class RouteBuilder {
     if (!_deepLinkFlag && _appKeyToPage.containsKey(navigatorKey)) {
       final List<Page<Object?>> historyPages = _appKeyToPage[navigatorKey]!;
 
-      /// Update: pop
-      if (historyPages.length > pages.length) {
+      /// CHANGE: pop & replace
+      if (historyPages.length >= pages.length) {
         while(historyPages.length > pages.length){
           historyPages.removeLast();
         }
@@ -246,7 +260,7 @@ class RouteBuilder {
           }
         }
       }
-      /// Update: push
+      /// CHANGE: push
       if (historyPages.length < pages.length) {
         int index = 0;
         for(; index < historyPages.length; index++){

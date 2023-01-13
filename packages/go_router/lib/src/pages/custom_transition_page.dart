@@ -126,10 +126,10 @@ class _CustomTransitionPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) =>
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      ) =>
       Semantics(
         scopesRoute: true,
         explicitChildNodes: true,
@@ -138,11 +138,11 @@ class _CustomTransitionPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) =>
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      Widget child,
+      ) =>
       _page.transitionsBuilder(
         context,
         animation,
@@ -161,14 +161,14 @@ class NoTransitionPage<T> extends CustomTransitionPage<T> {
     super.restorationId,
     super.key,
   }) : super(
-          transitionsBuilder: _transitionsBuilder,
-          transitionDuration: const Duration(microseconds: 1),
-        );
+    transitionsBuilder: _transitionsBuilder,
+    transitionDuration: const Duration(microseconds: 1),
+  );
 
   static Widget _transitionsBuilder(
-          BuildContext context,
-          Animation<double> animation,
-          Animation<double> secondaryAnimation,
-          Widget child) =>
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      Widget child) =>
       child;
 }

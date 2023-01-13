@@ -22,7 +22,7 @@ class RouteConfiguration {
     required this.navigatorKey,
   })  : assert(_debugCheckPath(routes, true)),
         assert(
-            _debugVerifyNoDuplicatePathParameter(routes, <String, GoRoute>{})),
+        _debugVerifyNoDuplicatePathParameter(routes, <String, GoRoute>{})),
         assert(_debugCheckParentNavigatorKeys(
             routes, <GlobalKey<NavigatorState>>[navigatorKey])) {
     _cacheNameToPath('', routes);
@@ -35,10 +35,10 @@ class RouteConfiguration {
       if (route is GoRoute) {
         if (isTopLevel) {
           assert(route.path.startsWith('/'),
-              'top-level path must start with "/": $route');
+          'top-level path must start with "/": $route');
         } else {
           assert(!route.path.startsWith('/') && !route.path.endsWith('/'),
-              'sub-route path may not start or end with /: $route');
+          'sub-route path may not start or end with /: $route');
         }
         subRouteIsTopLevel = false;
       } else if (route is ShellRoute) {
@@ -60,8 +60,8 @@ class RouteConfiguration {
           // Verify that the root navigator or a ShellRoute ancestor has a
           // matching navigator key.
           assert(
-              allowedKeys.contains(parentKey),
-              'parentNavigatorKey $parentKey must refer to'
+          allowedKeys.contains(parentKey),
+          'parentNavigatorKey $parentKey must refer to'
               " an ancestor ShellRoute's navigatorKey or GoRouter's"
               ' navigatorKey');
 
@@ -127,10 +127,10 @@ class RouteConfiguration {
 
   /// Looks up the url location by a [GoRoute]'s name.
   String namedLocation(
-    String name, {
-    Map<String, String> params = const <String, String>{},
-    Map<String, dynamic> queryParams = const <String, dynamic>{},
-  }) {
+      String name, {
+        Map<String, String> params = const <String, String>{},
+        Map<String, dynamic> queryParams = const <String, dynamic>{},
+      }) {
     assert(() {
       log.info('getting location for name: '
           '"$name"'
@@ -147,7 +147,7 @@ class RouteConfiguration {
       patternToRegExp(path, paramNames);
       for (final String paramName in paramNames) {
         assert(params.containsKey(paramName),
-            'missing param "$paramName" for $path');
+        'missing param "$paramName" for $path');
       }
 
       // Check that there are no extra params
@@ -162,8 +162,8 @@ class RouteConfiguration {
     };
     final String location = patternToPath(path, encodedParams);
     return Uri(
-            path: location,
-            queryParameters: queryParams.isEmpty ? null : queryParams)
+        path: location,
+        queryParameters: queryParams.isEmpty ? null : queryParams)
         .toString();
   }
 
@@ -206,8 +206,8 @@ class RouteConfiguration {
         if (route.name != null) {
           final String name = route.name!.toLowerCase();
           assert(
-              !_nameToPath.containsKey(name),
-              'duplication fullpaths for name '
+          !_nameToPath.containsKey(name),
+          'duplication fullpaths for name '
               '"$name":${_nameToPath[name]}, $fullPath');
           _nameToPath[name] = fullPath;
         }

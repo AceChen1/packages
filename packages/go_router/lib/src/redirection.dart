@@ -24,7 +24,7 @@ FutureOr<RouteMatchList> redirect(
     RouteConfiguration configuration,
     RouteMatcher matcher,
     {List<RouteMatchList>? redirectHistory,
-    Object? extra}) {
+      Object? extra}) {
   FutureOr<RouteMatchList> processRedirect(RouteMatchList prevMatchList) {
     final String prevLocation = prevMatchList.uri.toString();
     FutureOr<RouteMatchList> processTopLevelRedirect(
@@ -78,7 +78,7 @@ FutureOr<RouteMatchList> redirect(
       }
 
       final FutureOr<String?> routeLevelRedirectResult =
-          _getRouteLevelRedirect(context, configuration, prevMatchList, 0);
+      _getRouteLevelRedirect(context, configuration, prevMatchList, 0);
       if (routeLevelRedirectResult is String?) {
         return processRouteLevelRedirect(routeLevelRedirectResult);
       }
@@ -117,19 +117,19 @@ FutureOr<RouteMatchList> redirect(
 }
 
 FutureOr<String?> _getRouteLevelRedirect(
-  BuildContext context,
-  RouteConfiguration configuration,
-  RouteMatchList matchList,
-  int currentCheckIndex,
-) {
+    BuildContext context,
+    RouteConfiguration configuration,
+    RouteMatchList matchList,
+    int currentCheckIndex,
+    ) {
   if (currentCheckIndex >= matchList.matches.length) {
     return null;
   }
   final RouteMatch match = matchList.matches[currentCheckIndex];
   FutureOr<String?> processRouteRedirect(String? newLocation) =>
       newLocation ??
-      _getRouteLevelRedirect(
-          context, configuration, matchList, currentCheckIndex + 1);
+          _getRouteLevelRedirect(
+              context, configuration, matchList, currentCheckIndex + 1);
   final RouteBase route = match.route;
   FutureOr<String?> routeRedirectResult;
   if (route is GoRoute && route.redirect != null) {
@@ -157,12 +157,12 @@ FutureOr<String?> _getRouteLevelRedirect(
 }
 
 RouteMatchList _getNewMatches(
-  String newLocation,
-  Uri previousLocation,
-  RouteConfiguration configuration,
-  RouteMatcher matcher,
-  List<RouteMatchList> redirectHistory,
-) {
+    String newLocation,
+    Uri previousLocation,
+    RouteConfiguration configuration,
+    RouteMatcher matcher,
+    List<RouteMatchList> redirectHistory,
+    ) {
   try {
     final RouteMatchList newMatch = matcher.findMatch(newLocation);
     _addRedirect(redirectHistory, newMatch, previousLocation,
@@ -206,9 +206,9 @@ class RedirectionError extends Error implements UnsupportedError {
 
   @override
   String toString() => '${super.toString()} ${<String>[
-        ...matches
-            .map((RouteMatchList routeMatches) => routeMatches.uri.toString()),
-      ].join(' => ')}';
+    ...matches
+        .map((RouteMatchList routeMatches) => routeMatches.uri.toString()),
+  ].join(' => ')}';
 }
 
 /// Adds the redirect to [redirects] if it is valid.

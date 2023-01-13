@@ -13,7 +13,6 @@ import 'match.dart';
 import 'matching.dart';
 import 'misc/errors.dart';
 import 'typedefs.dart';
-import 'dart:async';
 
 /// GoRouter implementation of [RouterDelegate].
 class GoRouterDelegate extends RouterDelegate<RouteMatchList>
@@ -78,16 +77,14 @@ class GoRouterDelegate extends RouterDelegate<RouteMatchList>
 
   /// Pushes the given location onto the page stack
   Future<T?> push<T extends Object?>(RouteMatchList matches) {
-    // Create a completer for the promise and store it in the completers map.
-    final Completer<T?> completer = Completer<T?>();
-    
     assert(matches.last.route is! ShellRoute);
+    final Completer<T?> completer = Completer<T?>();
 
     // Remap the pageKey to allow any number of the same page on the stack
     final int count = (_pushCounts[matches.fullpath] ?? 0) + 1;
     _pushCounts[matches.fullpath] = count;
     final ValueKey<String> pageKey =
-        ValueKey<String>('${matches.fullpath}-p$count');
+    ValueKey<String>('${matches.fullpath}-p$count');
     final ImperativeRouteMatch newPageKeyMatch = ImperativeRouteMatch(
       route: matches.last.route,
       subloc: matches.last.subloc,
@@ -128,9 +125,9 @@ class GoRouterDelegate extends RouterDelegate<RouteMatchList>
 
   void _debugAssertMatchListNotEmpty() {
     assert(
-      _matchList.isNotEmpty,
-      'You have popped the last page off of the stack,'
-      ' there are no pages left to show',
+    _matchList.isNotEmpty,
+    'You have popped the last page off of the stack,'
+        ' there are no pages left to show',
     );
   }
 
@@ -158,12 +155,9 @@ class GoRouterDelegate extends RouterDelegate<RouteMatchList>
   ///
   /// See also:
   /// * [push] which pushes the given location onto the page stack.
-  Future<T?>? replace<T extends Object?>(RouteMatchList matches) {
+  void pushReplacement(RouteMatchList matches) {
     _matchList.pop();
     push(matches); // [push] will notify the listeners.
-
-    notifyListeners();
-    return matches.last.completer?.future as Future<T?>?;
   }
 
   /// For internal use; visible for testing only.
@@ -192,7 +186,7 @@ class GoRouterDelegate extends RouterDelegate<RouteMatchList>
   /// For use by the Router architecture as part of the RouterDelegate.
   @override
   Future<void> setNewRoutePath(RouteMatchList configuration) {
-    /// open deep link mode
+    /// CHANGE open deep link mode
     builder.resetAppKeyToPage();
     _matchList = configuration;
     assert(_matchList.isNotEmpty);
@@ -229,9 +223,9 @@ class _NavigatorStateIterator extends Iterator<NavigatorState> {
       final RouteBase route = match.route;
       if (route is GoRoute && route.parentNavigatorKey != null) {
         final GlobalKey<NavigatorState> parentNavigatorKey =
-            route.parentNavigatorKey!;
+        route.parentNavigatorKey!;
         final ModalRoute<Object?>? parentModalRoute =
-            ModalRoute.of(parentNavigatorKey.currentContext!);
+        ModalRoute.of(parentNavigatorKey.currentContext!);
         // The ModalRoute can be null if the parentNavigatorKey references the
         // root navigator.
         if (parentModalRoute == null) {
@@ -265,7 +259,7 @@ class _NavigatorStateIterator extends Iterator<NavigatorState> {
         // Must have a ModalRoute parent because the navigator ShellRoute
         // created must not be the root navigator.
         final ModalRoute<Object?> parentModalRoute =
-            ModalRoute.of(route.navigatorKey.currentContext!)!;
+        ModalRoute.of(route.navigatorKey.currentContext!)!;
         // There may be pageless route on top of ModalRoute that the
         // parentNavigatorKey is in. For example an open dialog.
         if (parentModalRoute.isCurrent == false) {
@@ -292,7 +286,7 @@ class ImperativeRouteMatch extends RouteMatch {
     required super.error,
     required super.pageKey,
     required this.matches,
-    required super.completer,
+    super.completer,
   });
 
   /// The matches that produces this route match.

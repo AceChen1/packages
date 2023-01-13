@@ -10,42 +10,42 @@ import 'configuration.dart';
 
 /// The widget builder for [GoRoute].
 typedef GoRouterWidgetBuilder = Widget Function(
-  BuildContext context,
-  GoRouterState state,
-);
+    BuildContext context,
+    GoRouterState state,
+    );
 
 /// The page builder for [GoRoute].
 typedef GoRouterPageBuilder = Page<dynamic> Function(
-  BuildContext context,
-  GoRouterState state,
-);
+    BuildContext context,
+    GoRouterState state,
+    );
 
 /// The widget builder for [ShellRoute].
 typedef ShellRouteBuilder = Widget Function(
-  BuildContext context,
-  GoRouterState state,
-  Widget child,
-);
+    BuildContext context,
+    GoRouterState state,
+    Widget child,
+    );
 
 /// The page builder for [ShellRoute].
 typedef ShellRoutePageBuilder = Page<dynamic> Function(
-  BuildContext context,
-  GoRouterState state,
-  Widget child,
-);
+    BuildContext context,
+    GoRouterState state,
+    Widget child,
+    );
 
 /// The signature of the navigatorBuilder callback.
 typedef GoRouterNavigatorBuilder = Widget Function(
-  BuildContext context,
-  GoRouterState state,
-  Widget child,
-);
+    BuildContext context,
+    GoRouterState state,
+    Widget child,
+    );
 
 /// Signature of a go router builder function with navigator.
 typedef GoRouterBuilderWithNav = Widget Function(
-  BuildContext context,
-  Widget child,
-);
+    BuildContext context,
+    Widget child,
+    );
 
 /// The signature of the redirect callback.
 typedef GoRouterRedirect = FutureOr<String?> Function(

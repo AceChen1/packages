@@ -6,8 +6,9 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'delegate.dart';
+
 import 'configuration.dart';
+import 'delegate.dart';
 import 'information_provider.dart';
 import 'logging.dart';
 import 'matching.dart';
@@ -50,9 +51,9 @@ class GoRouteInformationParser extends RouteInformationParser<RouteMatchList> {
   /// Called by the [Router]. The
   @override
   Future<RouteMatchList> parseRouteInformationWithDependencies(
-    RouteInformation routeInformation,
-    BuildContext context,
-  ) {
+      RouteInformation routeInformation,
+      BuildContext context,
+      ) {
     late final RouteMatchList initialMatches;
     try {
       initialMatches = matcher.findMatch(routeInformation.location!,
@@ -97,7 +98,10 @@ class GoRouteInformationParser extends RouteInformationParser<RouteMatchList> {
 
   /// for use by the Router architecture as part of the RouteInformationParser
   @override
-  RouteInformation restoreRouteInformation(RouteMatchList configuration) {
+  RouteInformation? restoreRouteInformation(RouteMatchList configuration) {
+    if (configuration.isEmpty) {
+      return null;
+    }
     if (configuration.matches.last is ImperativeRouteMatch) {
       configuration =
           (configuration.matches.last as ImperativeRouteMatch).matches;

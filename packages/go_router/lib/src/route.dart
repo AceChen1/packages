@@ -91,9 +91,8 @@ import 'typedefs.dart';
 /// ```
 /// In the above example, if /family route is matched, it will be used.
 /// else /:username route will be used.
-///
-/// See [Sub-routes](https://github.com/flutter/packages/blob/main/packages/go_router/example/lib/sub_routes.dart)
-/// for a complete runnable example.
+/// ///
+/// See [main.dart](https://github.com/flutter/packages/blob/main/packages/go_router_flow/example/lib/main.dart)
 @immutable
 abstract class RouteBase {
   const RouteBase._({
@@ -135,7 +134,7 @@ class GoRoute extends RouteBase {
   })  : assert(path.isNotEmpty, 'GoRoute path cannot be empty'),
         assert(name == null || name.isNotEmpty, 'GoRoute name cannot be empty'),
         assert(pageBuilder != null || builder != null || redirect != null,
-            'builder, pageBuilder, or redirect must be provided'),
+        'builder, pageBuilder, or redirect must be provided'),
         super._() {
     // cache the path regexp and parameters
     _pathRE = patternToRegExp(path, pathParams);
@@ -175,7 +174,7 @@ class GoRoute extends RouteBase {
   /// );
   /// ```
   ///
-  /// See the [named routes example](https://github.com/flutter/packages/blob/main/packages/go_router/example/lib/named_routes.dart)
+  /// See the [named routes example](https://github.com/flutter/packages/blob/main/packages/go_router_flow/example/lib/named_routes.dart)
   /// for a complete runnable app.
   final String? name;
 
@@ -200,7 +199,7 @@ class GoRoute extends RouteBase {
   /// The query parameter are also capture during the route parsing and stored
   /// in [GoRouterState].
   ///
-  /// See [Query parameters and path parameters](https://github.com/flutter/packages/blob/main/packages/go_router/example/lib/sub_routes.dart)
+  /// See [Query parameters and path parameters](https://github.com/flutter/packages/blob/main/packages/go_router_flow/example/lib/sub_routes.dart)
   /// to learn more about parameters.
   final String path;
 
@@ -285,7 +284,7 @@ class GoRoute extends RouteBase {
   ///
   /// Redirect can also be used for conditionally preventing users from visiting
   /// routes, also known as route guards. One canonical example is user
-  /// authentication. See [Redirection](https://github.com/flutter/packages/blob/main/packages/go_router/example/lib/redirection.dart)
+  /// authentication. See [Redirection](https://github.com/flutter/packages/blob/main/packages/go_router_flow/example/lib/redirection.dart)
   /// for a complete runnable example.
   ///
   /// If [BuildContext.dependOnInheritedWidgetOfExactType] is used during the
@@ -300,6 +299,7 @@ class GoRoute extends RouteBase {
   /// Navigator instead of the nearest ShellRoute ancestor.
   final GlobalKey<NavigatorState>? parentNavigatorKey;
 
+  // TODO(chunhtai): move all regex related help methods to path_utils.dart.
   /// Match this route against a location.
   RegExpMatch? matchPatternAsPrefix(String loc) =>
       _pathRE.matchAsPrefix(loc) as RegExpMatch?;

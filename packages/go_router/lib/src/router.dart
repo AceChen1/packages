@@ -19,7 +19,7 @@ import 'typedefs.dart';
 /// empty and must contain an [GoRouter] to match `/`.
 ///
 /// See the [Get
-/// started](https://github.com/flutter/packages/blob/main/packages/go_router/example/lib/main.dart)
+/// started](https://github.com/flutter/packages/blob/main/packages/go_router_flow/example/lib/main.dart)
 /// example, which shows an app with a simple route configuration.
 ///
 /// The [redirect] callback allows the app to redirect to a new location.
@@ -30,9 +30,9 @@ import 'typedefs.dart';
 /// changes.
 ///
 /// See also:
-/// * [Configuration](https://pub.dev/documentation/go_router/topics/Configuration-topic.html)
+/// * [Configuration](https://pub.dev/documentation/go_router_flow/latest/topics/Configuration-topic.html)
 /// * [GoRoute], which provides APIs to define the routing table.
-/// * [examples](https://github.com/flutter/packages/tree/main/packages/go_router/example),
+/// * [examples](https://github.com/flutter/packages/tree/main/packages/go_router_flow/example),
 ///    which contains examples for different routing scenarios.
 /// {@category Get started}
 /// {@category Upgrading}
@@ -137,7 +137,7 @@ class GoRouter extends ChangeNotifier implements RouterConfig<RouteMatchList> {
   RouteConfiguration get routeConfiguration => _routeConfiguration;
 
   /// Gets the current location.
-  // TODO(chunhtai): deprecates this once go_router_builder is migrated to
+  // TODO(chunhtai): deprecates this once go_router_flow_builder is migrated to
   // GoRouterState.of.
   String get location => _location;
   String _location = '/';
@@ -149,9 +149,9 @@ class GoRouter extends ChangeNotifier implements RouterConfig<RouteMatchList> {
     final String newLocation;
     if (routerDelegate.currentConfiguration.isNotEmpty &&
         routerDelegate.currentConfiguration.matches.last
-            is ImperativeRouteMatch) {
+        is ImperativeRouteMatch) {
       newLocation = (routerDelegate.currentConfiguration.matches.last
-              as ImperativeRouteMatch)
+      as ImperativeRouteMatch)
           .matches
           .uri
           .toString();
@@ -167,10 +167,10 @@ class GoRouter extends ChangeNotifier implements RouterConfig<RouteMatchList> {
   /// Get a location from route name and parameters.
   /// This is useful for redirecting to a named location.
   String namedLocation(
-    String name, {
-    Map<String, String> params = const <String, String>{},
-    Map<String, dynamic> queryParams = const <String, dynamic>{},
-  }) =>
+      String name, {
+        Map<String, String> params = const <String, String>{},
+        Map<String, dynamic> queryParams = const <String, dynamic>{},
+      }) =>
       _routeInformationParser.configuration.namedLocation(
         name,
         params: params,
@@ -192,11 +192,11 @@ class GoRouter extends ChangeNotifier implements RouterConfig<RouteMatchList> {
   /// `name='person', params={'fid': 'f2', 'pid': 'p1'}`
   /// Navigate to the named route.
   void goNamed(
-    String name, {
-    Map<String, String> params = const <String, String>{},
-    Map<String, dynamic> queryParams = const <String, dynamic>{},
-    Object? extra,
-  }) =>
+      String name, {
+        Map<String, String> params = const <String, String>{},
+        Map<String, dynamic> queryParams = const <String, dynamic>{},
+        Object? extra,
+      }) =>
       go(
         namedLocation(name, params: params, queryParams: queryParams),
         extra: extra,
@@ -216,8 +216,7 @@ class GoRouter extends ChangeNotifier implements RouterConfig<RouteMatchList> {
       // https://github.com/flutter/flutter/issues/99112
       _routerDelegate.navigatorKey.currentContext!,
     );
-
-    return _routerDelegate.push<T?>(matches);
+    return _routerDelegate.push<T>(matches);
   }
 
   /// Push a named route onto the page stack w/ optional parameters, e.g.
@@ -228,11 +227,10 @@ class GoRouter extends ChangeNotifier implements RouterConfig<RouteMatchList> {
         Map<String, dynamic> queryParams = const <String, dynamic>{},
         Object? extra,
       }) =>
-      push<T?>(
+      push<T>(
         namedLocation(name, params: params, queryParams: queryParams),
         extra: extra,
       );
-
 
   /// Replaces the top-most page of the page stack with the given URL location
   /// w/ optional query parameters, e.g. `/family/f2/person/p1?color=blue`.
@@ -240,19 +238,18 @@ class GoRouter extends ChangeNotifier implements RouterConfig<RouteMatchList> {
   /// See also:
   /// * [go] which navigates to the location.
   /// * [push] which pushes the location onto the page stack.
-  Future<T?> replace<T extends Object?>(String location,
-      {Object? extra}) async {
-    final RouteMatchList matches =
-    await routeInformationParser.parseRouteInformationWithDependencies(
+  void pushReplacement(String location, {Object? extra}) {
+    routeInformationParser
+        .parseRouteInformationWithDependencies(
       RouteInformation(location: location, state: extra),
       // TODO(chunhtai): avoid accessing the context directly through global key.
       // https://github.com/flutter/flutter/issues/99112
       _routerDelegate.navigatorKey.currentContext!,
-    );
-
-    return routerDelegate.replace<T?>(matches);
+    )
+        .then<void>((RouteMatchList matchList) {
+      routerDelegate.pushReplacement(matchList);
+    });
   }
-
 
   /// Replaces the top-most page of the page stack with the named route w/
   /// optional parameters, e.g. `name='person', params={'fid': 'f2', 'pid':
@@ -261,16 +258,17 @@ class GoRouter extends ChangeNotifier implements RouterConfig<RouteMatchList> {
   /// See also:
   /// * [goNamed] which navigates a named route.
   /// * [pushNamed] which pushes a named route onto the page stack.
-  Future<T?> replaceNamed<T extends Object?>(
+  void pushReplacementNamed(
       String name, {
         Map<String, String> params = const <String, String>{},
         Map<String, dynamic> queryParams = const <String, dynamic>{},
         Object? extra,
-      }) =>
-      replace<T?>(
-        namedLocation(name, params: params, queryParams: queryParams),
-        extra: extra,
-      );
+      }) {
+    pushReplacement(
+      namedLocation(name, params: params, queryParams: queryParams),
+      extra: extra,
+    );
+  }
 
   /// Pop the top-most route off the current screen.
   ///
@@ -295,8 +293,6 @@ class GoRouter extends ChangeNotifier implements RouterConfig<RouteMatchList> {
 
   /// Find the current GoRouter in the widget tree.
   static GoRouter of(BuildContext context) {
-    // final InheritedGoRouter? inherited =
-    //     context.dependOnInheritedWidgetOfExactType<InheritedGoRouter>();
     final InheritedGoRouter? inherited =
     context.findAncestorWidgetOfExactType<InheritedGoRouter>();
     assert(inherited != null, 'No GoRouter found in context');

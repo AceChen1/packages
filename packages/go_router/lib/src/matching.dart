@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import 'configuration.dart';
 import 'match.dart';
 import 'path_utils.dart';
-import 'dart:async';
 
 /// Converts a location into a list of [RouteMatch] objects.
 class RouteMatcher {
@@ -23,7 +23,7 @@ class RouteMatcher {
 
     final Map<String, String> pathParameters = <String, String>{};
     final List<RouteMatch> matches =
-        _getLocRouteMatches(uri, extra, pathParameters);
+    _getLocRouteMatches(uri, extra, pathParameters);
     return RouteMatchList(matches, uri, pathParameters);
   }
 
@@ -55,7 +55,7 @@ class RouteMatchList {
 
   /// Constructs an empty matches object.
   static RouteMatchList empty =
-      RouteMatchList(<RouteMatch>[], Uri.parse(''), const <String, String>{});
+  RouteMatchList(<RouteMatch>[], Uri.parse(''), const <String, String>{});
 
   static String _generateFullPath(List<RouteMatch> matches) {
     final StringBuffer buffer = StringBuffer();
@@ -103,9 +103,7 @@ class RouteMatchList {
       final GoRoute route = _matches.last.route as GoRoute;
       _uri = _uri.replace(path: removePatternFromPath(route.path, _uri.path));
     }
-    
     _matches.removeLast();
-
     // Also pop ShellRoutes when there are no subsequent route matches
     while (_matches.isNotEmpty && _matches.last.route is ShellRoute) {
       _matches.removeLast();
